@@ -1,24 +1,22 @@
 #!/usr/bin/python3
-"""get TODO list"""
+"""Returns TODO list progress for a given employee ID"""
 
-import json
 import requests
 import sys
+
 if __name__ == "__main__":
-    link = "https://jsonplaceholder.typicode.com/users/{}".format(sys.argv[1])
-    res = requests.get(link)
-    user = json.loads(res.text)
-    num = sys.argv[1]
-    link = "https://jsonplaceholder.typicode.com/users/{}/todos".format(num)
-    res = requests.get(link)
-    todos = json.loads(res.text)
-    done = []
-    for i in todos:
-        if i['completed']:
-            done.append(i)
+    if len(sys.argv) != 2:
+        print("Usage: ./0-gather_data_from_an_API.py <employee_id>")
+        sys.exit(1)
+
+    user_id = sys.argv[1]
+    user = requests.get(f"https://jsonplaceholder.typicode.com/users/{user_id}").json()
+    todos = requests.get(f"https://jsonplaceholder.typicode.com/users/{user_id}/todos").json()
+
+    done_tasks = [task for task in todos if task["completed"]]
+
     print("Employee {} is done with tasks({}/{}):".format(
-                                                          user['name'],
-                                                          len(done),
-                                                          len(todos)))
-    for i in done:
-        print("\t {}".format(i["title"]))
+        user.get("name"), len(done_tasks), len(todos)))
+
+    for task in done_tasks:
+        print("\t{}".format(task.get("title")))
